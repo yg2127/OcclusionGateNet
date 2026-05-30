@@ -57,6 +57,37 @@ model4_dms/
 
 ## 파이프라인 (end-to-end)
 
+### 추론 파이프라인 (occlusion gating)
+
+```mermaid
+flowchart TD
+    IMG["face frame"] --> FM["mediapipe FaceMesh<br/>478 landmarks"]
+    IMG --> OCC["occlusion CNN<br/>region별 가림 판정"]
+    IMG --> HG["ORFormer + HGNet<br/>landmark 복원"]
+
+    HG --> ALIGN["Umeyama 정합<br/>hgnet → facemesh 좌표계"]
+
+    FM --> GATE{"region<br/>가림?"}
+    OCC --> GATE
+    ALIGN --> GATE
+
+    GATE -- "정상" --> KEEP["facemesh 좌표 유지<br/>(iris 정밀도 보존)"]
+    GATE -- "가림" --> SWAP["복원 좌표로 치환"]
+    KEEP --> OCCGATE["occgateRAW landmarks"]
+    SWAP --> OCCGATE
+
+    OCCGATE --> FACE["face branch"]
+    POSE["body pose"] --> GCN["pose GCN"]
+    FACE --> FUSE["task_gated_late fusion<br/>(model4)"]
+    GCN --> FUSE
+    FUSE --> H1["action"]
+    FUSE --> H2["gaze (9-zone)"]
+    FUSE --> H3["hands"]
+    FUSE --> H4["talk"]
+```
+
+### 학습 / 캐시 생성 순서
+
 ```
 [학습된 자산]  ORFormer(landmark/) + HGNet(landmark/) + occ CNN(pipeline/)
        │
@@ -91,6 +122,13 @@ PYTHONPATH=$(pwd):$(pwd)/configs python src/training/train.py \
 
 - PDI = (clean − masked) / clean × 100. 낮을수록 가림에 강건.
 - occgateRAW 가 가림 부위 좌표를 HGNet 으로 복원해 masked gaze 와 robust 를 개선.
+
+### 오분류 사례 시각화
+
+가림(선글라스·마스크·노이즈/체커 패치)으로 facemesh 가 무너져 gaze zone 을 혼동하는 대표 사례.
+`[X]` = 오분류, `occ le/re/mo` = 좌안/우안/입 region 가림도, `no landmark` = facemesh 검출 실패.
+
+![occlusion confusion cases](docs/assets/confusion_cases.png)
 
 ## 모델 가중치 (`models/` — 로컬 전용, git 미추적)
 
