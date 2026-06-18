@@ -1,0 +1,25 @@
+{
+  "root": "/data/shared/scuppy/hyi/Classification_model_V5_transformer",
+  "artifacts_dir": "/data/shared/scuppy/hyi/Classification_model_V5_transformer/artifacts",
+  "out_dir": "/data/shared/scuppy/hyi/Classification_model_V5_transformer/bootstrap_results_seed42",
+  "tasks": [
+    "action",
+    "gaze",
+    "hands",
+    "talk"
+  ],
+  "num_bootstrap_seeds": 5000,
+  "seed_start": 0,
+  "reference_model": "v5_explicit_region_mask_gate_mediapipe",
+  "models": [
+    "v5_explicit_region_mask_gate_mediapipe",
+    "v5_explicit_region_scalar_mask_gate_medipipe",
+    "v5_no_occ_original_mediapipe_seed42",
+    "v5_occ_attention_bias_mediapipe",
+    "v5_occ_token_region_transformer_mediapipe",
+    "v5_task_gated_late_mediapipe",
+    "v5_task_region_gated_late_mediapipe",
+    "v5_task_region_scalar_gated_late_mediapipe"
+  ],
+  "note": "Bootstrap index is shared across all models for each task/seed."
+}

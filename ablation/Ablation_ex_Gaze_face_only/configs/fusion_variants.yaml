@@ -1,0 +1,141 @@
+# Copy one of these blocks into model.fusion in configs/region_transformer.yaml.
+# Keep the paths/data/window/model backbone sections unchanged.
+
+concat:
+  kind: concat
+
+concat_condition:
+  kind: concat_condition
+  occ_hidden_dim: 64
+  occ_dropout: 0.1
+
+task_gated_late:
+  kind: task_gated_late
+  gate_hidden_channels: 128
+  gate_dropout: 0.2
+  gate_feature_scale: 0.25
+  init_bias:
+    action: 0.0
+    gaze: -0.7
+    hands: 0.7
+    talk: -0.5
+
+task_region_gated_late:
+  kind: task_region_gated_late
+  gate_hidden_channels: 128
+  gate_dropout: 0.2
+  gate_feature_scale: 0.25
+  region_num_heads: 4
+  region_num_layers: 1
+  region_dropout: 0.1
+  region_ff_mult: 2
+  init_bias:
+    action: 0.0
+    gaze: 0.0
+    hands: 0.0
+    talk: 0.0
+
+explicit_region_mask_gate:
+  kind: explicit_region_mask_gate
+  gate_hidden_channels: 128
+  gate_dropout: 0.2
+  gate_feature_scale: 0.25
+  region_num_heads: 4
+  region_num_layers: 1
+  region_dropout: 0.1
+  region_ff_mult: 2
+  gate_condition_occ: true
+  region_occ_indices: [0, 1, 2, 2, 3, 3, -1, -1, -1, -1]
+  default_visible: 1.0
+  mask_strength: 1.0
+  min_reliability: 0.05
+  init_bias:
+    action: 0.0
+    gaze: 0.0
+    hands: 0.0
+    talk: 0.0
+
+occ_token_region_transformer:
+  kind: occ_token_region_transformer
+  gate_hidden_channels: 128
+  gate_dropout: 0.2
+  gate_feature_scale: 0.25
+  region_num_heads: 4
+  region_num_layers: 1
+  region_dropout: 0.1
+  region_ff_mult: 2
+  occ_token_hidden_dim: 128
+  gate_condition_occ: true
+  use_occ_token_residual: true
+  init_bias:
+    action: 0.0
+    gaze: 0.0
+    hands: 0.0
+    talk: 0.0
+
+occ_attention_bias:
+  kind: occ_attention_bias
+  gate_hidden_channels: 128
+  gate_dropout: 0.2
+  gate_feature_scale: 0.25
+  region_num_heads: 4
+  region_num_layers: 1
+  region_dropout: 0.1
+  region_ff_mult: 2
+  gate_condition_occ: true
+  region_occ_indices: [0, 1, 2, 2, 3, 3, -1, -1, -1, -1]
+  default_visible: 1.0
+  mask_strength: 1.0
+  min_reliability: 0.05
+  attention_bias_strength: 2.0
+  init_bias:
+    action: 0.0
+    gaze: 0.0
+    hands: 0.0
+    talk: 0.0
+
+task_region_scalar_gated_late:
+  kind: task_region_scalar_gated_late
+  gate_hidden_channels: 128
+  gate_dropout: 0.2
+  gate_feature_scale: 0.25
+  region_num_heads: 4
+  region_num_layers: 1
+  region_dropout: 0.1
+  region_ff_mult: 2
+  region_gate_condition_occ: true
+  scalar_gate_condition_occ: true
+  init_bias:
+    region_action: 0.0
+    region_gaze: 0.0
+    region_hands: 0.0
+    region_talk: 0.0
+    scalar_action: 0.0
+    scalar_gaze: -0.7
+    scalar_hands: 0.7
+    scalar_talk: -0.5
+
+explicit_region_scalar_mask_gate:
+  kind: explicit_region_scalar_mask_gate
+  gate_hidden_channels: 128
+  gate_dropout: 0.2
+  gate_feature_scale: 0.25
+  region_num_heads: 4
+  region_num_layers: 1
+  region_dropout: 0.1
+  region_ff_mult: 2
+  region_gate_condition_occ: true
+  scalar_gate_condition_occ: true
+  region_occ_indices: [0, 1, 2, 2, 3, 3, -1, -1, -1, -1]
+  default_visible: 1.0
+  mask_strength: 1.0
+  min_reliability: 0.05
+  init_bias:
+    region_action: 0.0
+    region_gaze: 0.0
+    region_hands: 0.0
+    region_talk: 0.0
+    scalar_action: 0.0
+    scalar_gaze: -0.7
+    scalar_hands: 0.7
+    scalar_talk: -0.5

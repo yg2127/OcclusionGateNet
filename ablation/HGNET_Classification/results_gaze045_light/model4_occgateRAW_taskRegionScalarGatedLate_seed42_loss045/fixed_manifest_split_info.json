@@ -1,0 +1,24 @@
+{
+  "mode": "fixed_items_manifest",
+  "fixed_items_json": "/data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json",
+  "train_variants": [
+    "clean",
+    "masked"
+  ],
+  "val_variants": [
+    "clean",
+    "masked"
+  ],
+  "test_variants": [
+    "clean",
+    "masked"
+  ],
+  "n_train_videos": 206,
+  "n_val_videos": 48,
+  "n_test_clean_videos": 52,
+  "n_test_masked_videos": 52,
+  "n_train_clips": 42061,
+  "n_val_clips": 9321,
+  "n_test_clean_clips": 10316,
+  "n_test_masked_clips": 10316
+}

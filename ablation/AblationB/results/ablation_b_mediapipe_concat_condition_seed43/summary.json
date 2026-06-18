@@ -1,0 +1,176 @@
+{
+  "best_epoch": 9,
+  "best_score": 0.8703727366159504,
+  "test_splits": {
+    "test_clean": {
+      "loss": 0.5600690270129586,
+      "per_head": {
+        "action": {
+          "window_f1_macro": 0.8961344337816787,
+          "window_acc": 0.9283892902677433,
+          "clip_f1_macro": 0.8962715284132092,
+          "clip_acc": 0.9282606388623581
+        },
+        "gaze": {
+          "window_f1_macro": 0.5249962917152798,
+          "window_acc": 0.5744888023369036,
+          "clip_f1_macro": 0.5243446420881853,
+          "clip_acc": 0.5739299610894941
+        },
+        "hands": {
+          "window_f1_macro": 0.7221279075722544,
+          "window_acc": 0.9477791745233606,
+          "clip_f1_macro": 0.7218186363836322,
+          "clip_acc": 0.9475776917442712
+        },
+        "talk": {
+          "window_f1_macro": 0.7314119573532224,
+          "window_acc": 0.776774330641734,
+          "clip_f1_macro": 0.7314714933746194,
+          "clip_acc": 0.7769287912554388
+        }
+      },
+      "gaze_binary_on_distraction": {
+        "window_acc": 0.7538249043773906,
+        "window_f1_macro": 0.6663615551328188,
+        "clip_acc": 0.7476387562347447,
+        "clip_f1_macro": 0.6621034839213698,
+        "n_windows": 18824,
+        "support_front": 15722,
+        "support_not_front": 3102
+      }
+    },
+    "test_masked": {
+      "loss": 0.6376672421799586,
+      "per_head": {
+        "action": {
+          "window_f1_macro": 0.8670735939125446,
+          "window_acc": 0.9066914812621606,
+          "clip_f1_macro": 0.8668082829323993,
+          "clip_acc": 0.9065703243152411
+        },
+        "gaze": {
+          "window_f1_macro": 0.46532810120983925,
+          "window_acc": 0.5161290322580645,
+          "clip_f1_macro": 0.46106459862177324,
+          "clip_acc": 0.5133689839572193
+        },
+        "hands": {
+          "window_f1_macro": 0.70617391483331,
+          "window_acc": 0.9371314674860892,
+          "clip_f1_macro": 0.7089014002680623,
+          "clip_acc": 0.9376340537865039
+        },
+        "talk": {
+          "window_f1_macro": 0.7202980307338361,
+          "window_acc": 0.7640639539802048,
+          "clip_f1_macro": 0.7206643575131102,
+          "clip_acc": 0.7644093429675685
+        }
+      },
+      "gaze_binary_on_distraction": {
+        "window_acc": 0.6634802470180188,
+        "window_f1_macro": 0.5973369779476969,
+        "clip_acc": 0.6541757687783566,
+        "clip_f1_macro": 0.591627453804848,
+        "n_windows": 11821,
+        "support_front": 9906,
+        "support_not_front": 1915
+      }
+    }
+  },
+  "test_clean_vs_masked_drop": {
+    "action": {
+      "clean_clip_f1_macro": 0.8962715284132092,
+      "masked_clip_f1_macro": 0.8668082829323993,
+      "drop_clip_f1_macro": 0.02946324548080992,
+      "relative_drop_clip_f1_macro": 0.032873124434704165,
+      "clean_clip_acc": 0.9282606388623581,
+      "masked_clip_acc": 0.9065703243152411,
+      "drop_clip_acc": 0.021690314547117007,
+      "relative_drop_clip_acc": 0.023366621010344524,
+      "clean_window_f1_macro": 0.8961344337816787,
+      "masked_window_f1_macro": 0.8670735939125446,
+      "drop_window_f1_macro": 0.029060839869134103,
+      "relative_drop_window_f1_macro": 0.03242910747944105,
+      "clean_window_acc": 0.9283892902677433,
+      "masked_window_acc": 0.9066914812621606,
+      "drop_window_acc": 0.021697809005582713,
+      "relative_drop_window_acc": 0.02337145552306529
+    },
+    "gaze": {
+      "clean_clip_f1_macro": 0.5243446420881853,
+      "masked_clip_f1_macro": 0.46106459862177324,
+      "drop_clip_f1_macro": 0.06328004346641208,
+      "relative_drop_clip_f1_macro": 0.12068406614092858,
+      "clean_clip_acc": 0.5739299610894941,
+      "masked_clip_acc": 0.5133689839572193,
+      "drop_clip_acc": 0.06056097713227482,
+      "relative_drop_clip_acc": 0.1055198042236924,
+      "clean_window_f1_macro": 0.5249962917152798,
+      "masked_window_f1_macro": 0.46532810120983925,
+      "drop_window_f1_macro": 0.05966819050544059,
+      "relative_drop_window_f1_macro": 0.11365449898796678,
+      "clean_window_acc": 0.5744888023369036,
+      "masked_window_acc": 0.5161290322580645,
+      "drop_window_acc": 0.05835977007883908,
+      "relative_drop_window_acc": 0.10158556588299616
+    },
+    "hands": {
+      "clean_clip_f1_macro": 0.7218186363836322,
+      "masked_clip_f1_macro": 0.7089014002680623,
+      "drop_clip_f1_macro": 0.012917236115569941,
+      "relative_drop_clip_f1_macro": 0.01789540400381778,
+      "clean_clip_acc": 0.9475776917442712,
+      "masked_clip_acc": 0.9376340537865039,
+      "drop_clip_acc": 0.009943637957767315,
+      "relative_drop_clip_acc": 0.010493744253796625,
+      "clean_window_f1_macro": 0.7221279075722544,
+      "masked_window_f1_macro": 0.70617391483331,
+      "drop_window_f1_macro": 0.015953992738944378,
+      "relative_drop_window_f1_macro": 0.022093028910322315,
+      "clean_window_acc": 0.9477791745233606,
+      "masked_window_acc": 0.9371314674860892,
+      "drop_window_acc": 0.010647707037271359,
+      "relative_drop_window_acc": 0.011234375394063818
+    },
+    "talk": {
+      "clean_clip_f1_macro": 0.7314714933746194,
+      "masked_clip_f1_macro": 0.7206643575131102,
+      "drop_clip_f1_macro": 0.010807135861509165,
+      "relative_drop_clip_f1_macro": 0.014774514057479949,
+      "clean_clip_acc": 0.7769287912554388,
+      "masked_clip_acc": 0.7644093429675685,
+      "drop_clip_acc": 0.012519448287870327,
+      "relative_drop_clip_acc": 0.01611402284067779,
+      "clean_window_f1_macro": 0.7314119573532224,
+      "masked_window_f1_macro": 0.7202980307338361,
+      "drop_window_f1_macro": 0.01111392661938626,
+      "relative_drop_window_f1_macro": 0.015195166701409269,
+      "clean_window_acc": 0.776774330641734,
+      "masked_window_acc": 0.7640639539802048,
+      "drop_window_acc": 0.012710376661529188,
+      "relative_drop_window_acc": 0.01636302354511185
+    }
+  },
+  "n_train_clips": 42068,
+  "n_val_clips": 9331,
+  "n_test_clips_by_split": {
+    "test_clean": 10309,
+    "test_masked": 10309
+  },
+  "n_train_windows": 62149,
+  "n_val_windows": 13383,
+  "n_test_windows_by_split": {
+    "test_clean": 19851,
+    "test_masked": 12565
+  },
+  "inference_ms_per_window": 7.175279934502518,
+  "model_params": 1937186,
+  "fusion_kind": "concat_condition",
+  "pose_in_ch": 7,
+  "face_in_ch": 4,
+  "num_face_regions": 10,
+  "face_encoder": "region_pool",
+  "loader_face_v": 478
+}

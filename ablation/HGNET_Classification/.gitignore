@@ -1,0 +1,33 @@
+# byte-compiled
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# 대용량 학습 산출물 / 데이터 (README 경로 참조)
+*.pt
+*.pth
+*.ckpt
+*.npz
+*.npy
+*.mp4
+*.avi
+
+# 결과/캐시 디렉토리
+# results: 대용량만 차단(핵심 결과 CSV/json 은 추적)
+results/**/*.pt
+results/**/clip_manifest_*.json
+artifacts/
+runs/
+logs/
+_splits*/
+hgnet_fixedmask_ft/
+wandb/
+
+# OS
+.DS_Store
+
+
+# 모델 가중치(바이너리)만 미추적 — models/ 내 .md(README/PROVENANCE)는 추적
+models/**/*.pt
+models/**/*.tflite
+*.tflite

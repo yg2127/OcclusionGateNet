@@ -1,0 +1,196 @@
+seed: 42
+device: cuda
+
+paths:
+  dmd_root:        /data/shared/DMD
+  pose_root:       /data/shared/DMD_landmarks/yolo_pose
+  face_root:       /data/shared/Occlusion_subset_dataset/region_occlusion_video_dataset_v3_original_fixedmask_yolo_face_facemesh_canonical/facemesh
+  face5pt_root:    /data/shared/Occlusion_subset_dataset/region_occlusion_video_dataset_v3_original_fixedmask_yolo_face_facemesh_canonical/yolo_face
+  frame_shifts:    /data/shared/scuppy/hyi/Classification_model_V5_transformer/constants/frame_shifts.json
+
+  results_root:    /data/shared/scuppy/hyi/Classification_model_V5_transformer/results
+  save_root:       /data/shared/scuppy/hyi/Classification_model_V5_transformer/artifacts/v5_task_gated_late
+  fixed_items_json: /data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+
+occ:
+  enabled: true
+  mode: window_mean
+  dim: 5
+  face_npz_to_occ_npz: /data/shared/Occlusion_subset_dataset/region_occlusion_video_dataset_v3_original_fixedmask_occ_pred/face_npz_to_occ_npz.json
+  use_computed_only: true
+  default_visible_prob: 0.5
+  default_crop_valid: 0.0
+
+data:
+  use_distraction:        true
+  use_gaze:               true
+  distraction_sessions:   [s1, s2, s3, s4]
+  gaze_sessions:          [s6]
+  clip_len:               50
+
+  action_stride:          25
+  gaze_stride:            25
+  normal_ratio:           0.3
+
+  use_fixed_items_manifest: true
+  train_variants: ["clean", "masked"]
+  val_variants:   ["clean", "masked"]
+  test_variants:  ["clean", "masked"]
+
+face:
+  mode:                   facemesh_full
+  num_landmarks:          478
+
+  encoder:                region_pool
+  region_scheme:          dms_10
+  region_reduce:          mean
+  num_regions:            10
+
+  use_z:                  true
+  use_detected_channel:   true
+  use_det_score_channel:  false
+  bbox_det_thres:         0.25
+
+pose:
+  num_joints:        17
+  joint_conf_thres:  0.2
+  use_bone:          true
+  use_velocity:      true
+  use_conf_channel:  true
+
+window:
+  size:                        48
+  stride:                      24
+  max_per_clip:                null
+  pose_min_valid_frames:       16
+  pose_min_valid_ratio:        0.35
+  pose_min_valid_joint_ratio:  0.15
+  face_min_detected_ratio:     0.20
+
+split:
+  train_ratio: 0.70
+  val_ratio:   0.15
+  test_ratio:  0.15
+
+model:
+  pose_mid_channels:  128
+  face_mid_channels:  128
+  fused_channels:     256
+
+  # --------------------------------------------------------------------------
+  # fusion.kind selects the OCC-aware fusion module.
+  #
+  # V5 핵심은 task_region_scalar_gated_late이다.
+  # 이 구조는 face-region Transformer + task별 region gate + task별 pose/face
+  # scalar gate를 함께 사용한다. 아래 kind만 바꾸면 같은 V5 backbone,
+  # 같은 dataloader, 같은 train/eval loop에서 fusion 방식만 교체할 수 있다.
+  #
+  # Available:
+  #   concat                         : no explicit OCC fusion baseline
+  #   concat_condition               : shared feature + occ embedding
+  #   task_gated_late                : task-wise pose/face gate conditioned by occ
+  #   task_region_gated_late         : task-wise region gate after region Transformer
+  #   explicit_region_mask_gate      : V4-style 3-A, region gate × occ reliability
+  #   occ_token_region_transformer   : V4-style 3-B, add occ token to region Transformer
+  #   occ_attention_bias             : V4-style 3-C, inject occ as attention bias
+  #   task_region_scalar_gated_late  : V5 core, region gate + scalar pose/face gate
+  #   explicit_region_scalar_mask_gate:
+  #       V5 core + explicit region reliability mask
+  #
+  # Recommended V5 order:
+  #   task_region_scalar_gated_late -> explicit_region_scalar_mask_gate
+  #   -> occ_token_region_transformer -> occ_attention_bias
+  # --------------------------------------------------------------------------
+  fusion:
+    kind: task_gated_late
+
+    gate_hidden_channels: 128
+    gate_dropout: 0.2
+    gate_feature_scale: 0.25
+
+    region_num_heads: 4
+    region_num_layers: 1
+    region_dropout: 0.1
+    region_ff_mult: 2
+
+    # V5 core gate를 OCC-conditioned로 쓸지 여부.
+    # false로 두면 원래 V5 hybrid gate에 더 가깝고,
+    # true로 두면 region/scalar gate 입력에 occ_vector가 함께 들어간다.
+    region_gate_condition_occ: true
+    scalar_gate_condition_occ: true
+
+    # dms_10 region index -> occ vector index mapping
+    # occ dim = 5 기준 예상:
+    #   0: left_eye_visible
+    #   1: right_eye_visible
+    #   2: nose_visible
+    #   3: mouth_visible
+    #   4: crop_valid 또는 face_valid 계열
+    # -1은 해당 region에 직접 대응되는 occ label이 없어서 default_visible 사용.
+    region_occ_indices: [0, 1, 2, 2, 3, 3, -1, -1, -1, -1]
+    default_visible: 1.0
+    mask_strength: 1.0
+    min_reliability: 0.05
+
+    init_bias:
+      # face region gates: neutral start
+      region_action: 0.0
+      region_gaze:   0.0
+      region_hands:  0.0
+      region_talk:   0.0
+
+      # scalar pose/face gates: original V5 task-gated prior
+      # gate = pose weight, 1-gate = face weight
+      scalar_action: 0.0
+      scalar_gaze:  -0.7
+      scalar_hands:  0.7
+      scalar_talk:  -0.5
+
+  temporal:
+    kind:      identity
+    num_heads: 4
+    dropout:   0.1
+    max_len:   8192
+
+  dropout_backbone:  0.1
+  dropout_head:      0.3
+
+train:
+  batch_size:       64
+  num_workers:      8
+  epochs:           50
+  lr:               7.5e-4
+  weight_decay:     1.0e-4
+  grad_clip_norm:   1.0
+  patience:         8
+  save_every_epoch: true
+  resume:           false
+  resume_path:      /data/shared/scuppy/hyi/Classification_model_V5_transformer/artifacts/v1.5_region_pool_transformer/best.pt
+  use_class_weight:
+    action: true
+    gaze:   true
+    hands:  true
+    talk:   true
+
+loss:
+  alpha_action:      1.0
+  alpha_gaze:        0.5
+  alpha_hands:       0.3
+  alpha_talk:        0.2
+  gaze_weak_weight:  0.0
+
+best_score_weights:
+  action: 0.70
+  gaze:   0.15
+  hands:  0.10
+  talk:   0.05
+
+eval:
+  clip_agg_mode: topk_mean
+  clip_topk:     3
+
+notify:
+  enabled:     false
+  script:      /home/yg/code/claude/telegram-bot/train_notify.sh
+  tag:         v5_task_region_scalar_occ
+  every_epoch: false
