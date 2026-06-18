@@ -1,0 +1,5 @@
+baseline,ours_model,head_name,n,base_acc,ours_acc,base_wrong_ours_correct,ours_wrong_base_correct,label_disagree,label_disagree_rate,mean_true_prob_gain,mean_margin_gain,max_showcase_score
+pose_guided,hgnet_explicit_region_scalar_mask_gate,action,5949,0.9040174819297361,0.895780803496386,245,294,614,0.10321062363422424,-0.011249526,-0.011429628,8.419312715530396
+pose_guided,hgnet_explicit_region_scalar_mask_gate,gaze,374,0.5294117647058824,0.6256684491978609,60,24,134,0.3582887700534759,0.06982346,-0.121849,8.507505238056183
+pose_guided,hgnet_explicit_region_scalar_mask_gate,hands,6059,0.9379435550420862,0.9255652747978215,124,199,363,0.059910876382241296,-0.01812829,-0.026392842,8.33419942855835
+pose_guided,hgnet_explicit_region_scalar_mask_gate,talk,5949,0.776264918473693,0.7777777777777778,143,134,277,0.046562447470163054,-0.04874072,-0.16658731,7.586380422115326

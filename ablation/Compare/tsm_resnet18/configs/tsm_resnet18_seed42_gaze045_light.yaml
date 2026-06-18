@@ -1,0 +1,80 @@
+seed: 42
+device: cuda
+paths:
+  dmd_root: /data/shared/DMD
+  clip_manifest_path: /data/shared/scuppy/Classification_model_V1/results/v1.2/clip_manifest.json
+  save_root: /data/shared/scuppy/hyi/Ablation/Compare/tsm_resnet18/artifacts_gaze045_light/tsm_resnet18_seed42_gaze045_light
+  fixed_items_json: /data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+fixed_split:
+  enabled: true
+  json_path: /data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+  protocol: clean_masked_augmentation_baseline
+  fallback_clip_manifest_paths:
+  - /data/shared/scuppy/Classification_model_V1/results/v1.1/clip_manifest.json
+data:
+  num_segments: 8
+  frames_per_segment: 1
+  image_size: 112
+  train_variants:
+  - clean
+  - masked
+  val_variants:
+  - clean
+  - masked
+  test_variants:
+  - clean
+  - masked
+model:
+  pretrained: false
+  share_backbone: true
+  feat_dropout: 0.0
+  view_dim: 256
+  fusion_dim: 512
+  dropout: 0.3
+  tsm_fold_div: 8
+train:
+  batch_size: 8
+  num_workers: 2
+  prefetch_factor: 1
+  persistent_workers: false
+  torch_num_threads: 2
+  epochs: 20
+  patience: 4
+  lr: 0.00075
+  weight_decay: 0.0001
+  grad_clip_norm: 1.0
+  amp: true
+  use_class_weight:
+    action: true
+    gaze: true
+    hands: true
+    talk: true
+  save_every_epoch: false
+loss:
+  action: 0.45
+  gaze: 0.45
+  hands: 0.05
+  talk: 0.05
+  alpha_action: 0.45
+  alpha_gaze: 0.45
+  alpha_hands: 0.05
+  alpha_talk: 0.05
+  gaze_weak_weight: 0.0
+best_score_weights:
+  action: 0.45
+  gaze: 0.45
+  hands: 0.05
+  talk: 0.05
+eval:
+  save_predictions: true
+debug:
+  max_train: 0
+  max_val: 0
+  max_test: 0
+cache:
+  enabled: true
+  root: /data/shared/scuppy/hyi/Ablation/Compare/tsm_resnet18/cache/fixed_clean_masked_tsm112_s8
+  dtype: float16
+  load_as_float32: true
+  rebuild: false
+  log_every: 500

@@ -1,0 +1,129 @@
+seed: 42
+device: cuda
+paths:
+  classification_root: /data/shared/scuppy/Classification_model_V1
+  dmd_root: /data/shared/DMD
+  pose_root: /data/shared/DMD_landmarks/yolo_pose
+  face_root: /data/shared/DMD_landmarks/facemesh
+  face5pt_root: /data/shared/DMD_landmarks/yolo_face
+  head_pose_root: null
+  frame_shifts: /data/shared/scuppy/Classification_model_V1/constants/frame_shifts.json
+  clip_manifest_path: /data/shared/scuppy/Classification_model_V1/results/v1.2/clip_manifest.json
+  split_info_path: null
+  save_root: /data/shared/scuppy/hyi/Ablation/Compare/dmd_original/artifacts_gaze045_light/dmd_original_seed42_gaze045_light
+  fixed_items_json: /data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+fixed_split:
+  enabled: true
+  json_path: /data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+  protocol: clean_masked_augmentation_baseline
+  fallback_clip_manifest_paths:
+  - /data/shared/scuppy/Classification_model_V1/results/v1.1/clip_manifest.json
+data:
+  use_distraction: true
+  use_gaze: true
+  distraction_sessions:
+  - s1
+  - s2
+  - s3
+  - s4
+  gaze_sessions:
+  - s6
+  clip_len: 50
+  action_stride: 25
+  gaze_stride: 25
+  normal_ratio: 0.3
+  use_fixed_items_manifest: true
+  train_variants:
+  - clean
+  - masked
+  val_variants:
+  - clean
+  - masked
+  test_variants:
+  - clean
+  - masked
+face:
+  mode: facemesh_full
+  num_landmarks: 478
+  num_regions: 478
+  use_z: true
+  use_detected_channel: true
+  use_det_score_channel: true
+  bbox_det_thres: 0.25
+pose:
+  num_joints: 17
+  joint_conf_thres: 0.2
+  use_bone: true
+  use_velocity: true
+  use_conf_channel: true
+window:
+  size: 48
+  stride: 24
+  max_per_clip: null
+  pose_min_valid_frames: 16
+  pose_min_valid_ratio: 0.35
+  pose_min_valid_joint_ratio: 0.15
+  face_min_detected_ratio: 0.2
+split:
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+baseline:
+  fusion_kind: late_fusion
+  proj_dim: 128
+  stream_dim: 256
+  fusion_dim: 512
+  dropout: 0.3
+  use_head_pose: false
+  score_fusion_body_weight: 1.0
+  score_fusion_face_weight: 1.0
+  score_fusion_head_pose_weight: 0.5
+train:
+  batch_size: 64
+  num_workers: 6
+  epochs: 20
+  lr: 0.00075
+  weight_decay: 0.0001
+  grad_clip_norm: 1.0
+  patience: 4
+  save_every_epoch: false
+  resume: false
+  resume_path: null
+  use_class_weight:
+    action: true
+    gaze: true
+    hands: true
+    talk: true
+loss: &id001
+  alpha_action: 0.45
+  alpha_gaze: 0.45
+  alpha_hands: 0.05
+  alpha_talk: 0.05
+  gaze_weak_weight: 0.0
+best_score_weights: &id002
+  action: 0.45
+  gaze: 0.45
+  hands: 0.05
+  talk: 0.05
+eval:
+  clip_agg_mode: topk_mean
+  clip_topk: 3
+notify:
+  enabled: false
+  script: /home/yg/code/claude/telegram-bot/train_notify.sh
+  tag: dmd_original_seed42_gaze045_light
+  every_epoch: false
+gaze045_light_experiment:
+  source_config: dmd_original_fixed_split_template_batch64.yaml
+  experiment_name: dmd_original_seed42_gaze045_light
+  purpose: 'V5-aligned DMD original baseline: seed42, fixed manifest, action/gaze-balanced
+    loss and best-score weights'
+  loss_weights: *id001
+  best_score_weights: *id002
+  light_train:
+    epochs: 20
+    patience: 4
+    save_every_epoch: false
+    batch_size: 64
+    num_workers: 6
+    lr: 0.00075

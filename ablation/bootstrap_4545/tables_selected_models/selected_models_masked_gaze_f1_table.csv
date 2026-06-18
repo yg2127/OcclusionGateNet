@@ -1,0 +1,8 @@
+﻿model,masked_gaze_f1_macro
+hgnet_explicit_region_scalar_mask_gate,0.5851258700658954
+DriveAct,0.5222939771149834
+pose_guided,0.48414671710049917
+spatiotemporal,0.4721182705322706
+dfs,0.4632276568549261
+skateformer,0.4391074763851443
+dmd_original,0.3996355569497442

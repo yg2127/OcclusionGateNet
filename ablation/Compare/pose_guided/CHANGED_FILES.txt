@@ -1,0 +1,17 @@
+V5-style refactor for pose_guided baseline:
+- Added configs/pose_guided_seed42_gaze045_light.yaml
+- Added train_pose_guided_multitask.py
+- Added run_seed42.sh and scripts/run_seed42.sh
+- Added run_export_predictions.sh
+- Added README_run.md
+- Updated src/training/train.py default config
+- Removed old artifacts/results/logs/__pycache__ from package
+
+Core settings:
+- seed=42 only
+- train.patience=4
+- epochs=20, lr=0.00075, batch_size=64, num_workers=6
+- loss alpha: action=0.45, gaze=0.45, hands=0.05, talk=0.05
+- best_score_weights: action=0.45, gaze=0.45, hands=0.05, talk=0.05
+- fixed_items_json=/data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+- save_root=/data/shared/scuppy/hyi/Ablation/Compare/pose_guided/artifacts_gaze045_light/pose_guided_seed42_gaze045_light

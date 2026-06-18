@@ -1,0 +1,16 @@
+V5-style refactor for spatiotemporal comparator
+
+- Added configs/spatiotemporal_seed42_gaze045_light.yaml
+- Updated generated/base config to seed42 + gaze045 V5-style settings
+- Added run_seed42.sh
+- Added run_export_predictions.sh
+- Added README_run.md
+- Excluded previous artifacts/results/logs/__pycache__ from release zip
+
+Core settings:
+- seed=42
+- patience=4
+- loss: action=0.45, gaze=0.45, hands=0.05, talk=0.05
+- best_score_weights: action=0.45, gaze=0.45, hands=0.05, talk=0.05
+- fixed_items_json=/data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+- target run root=/data/shared/scuppy/hyi/Ablation/Compare/spatiotemporal

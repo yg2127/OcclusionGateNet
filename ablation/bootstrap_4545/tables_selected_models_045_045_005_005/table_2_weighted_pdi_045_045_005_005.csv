@@ -1,0 +1,8 @@
+﻿model,weighted_pdi_percent_045_045_005_005
+pose_guided,0.8503708486140944
+DriveAct,2.5823081403363486
+hgnet_explicit_region_scalar_mask_gate,3.427908495702931
+dfs,3.5876550442819517
+dmd_original,5.808906658678215
+spatiotemporal,6.428769630668622
+skateformer,8.314378922900723
