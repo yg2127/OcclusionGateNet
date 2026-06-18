@@ -1,0 +1,186 @@
+seed: 42
+device: cuda
+paths:
+  dmd_root: /data/shared/DMD
+  pose_root: /data/shared/DMD_landmarks/yolo_pose
+  face_root: /data/shared/Occlusion_subset_dataset/region_occlusion_video_dataset_v3_original_fixedmask_yolo_face_facemesh_canonical/facemesh
+  face5pt_root: /data/shared/Occlusion_subset_dataset/region_occlusion_video_dataset_v3_original_fixedmask_yolo_face_facemesh_canonical/yolo_face
+  frame_shifts: /data/shared/scuppy/hyi/Ablation/HGNET_Classification/classifier/constants/frame_shifts.json
+  results_root: /data/shared/scuppy/hyi/Ablation/HGNET_Classification/results_gaze045_light
+  save_root: /data/shared/scuppy/hyi/Ablation/HGNET_Classification/results_gaze045_light/model4_occgateRAW_explicitRegionScalarMaskGate_seed42_loss045
+  fixed_items_json: /data/shared/scuppy/hyi/fixed_splits/dms_clean_masked_fixed_items_v1.json
+occ:
+  enabled: true
+  mode: window_mean
+  dim: 5
+  face_npz_to_occ_npz: /data/shared/Occlusion_subset_dataset/region_occlusion_video_dataset_v3_original_fixedmask_occ_pred/face_npz_to_occ_npz.json
+  use_computed_only: true
+  default_visible_prob: 0.5
+  default_crop_valid: 0.0
+data:
+  use_distraction: true
+  use_gaze: true
+  distraction_sessions:
+  - s1
+  - s2
+  - s3
+  - s4
+  gaze_sessions:
+  - s6
+  clip_len: 50
+  action_stride: 25
+  gaze_stride: 25
+  normal_ratio: 0.3
+  use_fixed_items_manifest: true
+  train_variants:
+  - clean
+  - masked
+  val_variants:
+  - clean
+  - masked
+  test_variants:
+  - clean
+  - masked
+face:
+  mode: facemesh_full
+  num_landmarks: 478
+  encoder: region_pool
+  region_scheme: dms_10
+  region_reduce: mean
+  num_regions: 10
+  use_z: true
+  use_detected_channel: true
+  use_det_score_channel: false
+  bbox_det_thres: 0.25
+  npz_swap:
+    enabled: true
+    from: _facemesh.npz
+    to: _hgnet478_occgateRAW.npz
+pose:
+  num_joints: 17
+  joint_conf_thres: 0.2
+  use_bone: true
+  use_velocity: true
+  use_conf_channel: true
+window:
+  size: 48
+  stride: 24
+  max_per_clip: null
+  pose_min_valid_frames: 16
+  pose_min_valid_ratio: 0.35
+  pose_min_valid_joint_ratio: 0.15
+  face_min_detected_ratio: 0.2
+split:
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+model:
+  pose_mid_channels: 128
+  face_mid_channels: 128
+  fused_channels: 256
+  fusion:
+    kind: explicit_region_scalar_mask_gate
+    gate_hidden_channels: 128
+    gate_dropout: 0.2
+    gate_feature_scale: 0.25
+    region_num_heads: 4
+    region_num_layers: 1
+    region_dropout: 0.1
+    region_ff_mult: 2
+    region_gate_condition_occ: true
+    scalar_gate_condition_occ: true
+    region_occ_indices:
+    - 0
+    - 1
+    - 2
+    - 2
+    - 3
+    - 3
+    - -1
+    - -1
+    - -1
+    - -1
+    default_visible: 1.0
+    mask_strength: 1.0
+    min_reliability: 0.05
+    init_bias:
+      region_action: 0.0
+      region_gaze: 0.0
+      region_hands: 0.0
+      region_talk: 0.0
+      scalar_action: 0.0
+      scalar_gaze: -0.7
+      scalar_hands: 0.7
+      scalar_talk: -0.5
+  temporal:
+    kind: identity
+    num_heads: 4
+    dropout: 0.1
+    max_len: 8192
+  dropout_backbone: 0.1
+  dropout_head: 0.3
+train:
+  batch_size: 64
+  num_workers: 8
+  epochs: 50
+  lr: 0.00075
+  weight_decay: 0.0001
+  grad_clip_norm: 1.0
+  patience: 4
+  save_every_epoch: true
+  resume: false
+  resume_path: null
+  use_class_weight:
+    action: true
+    gaze: true
+    hands: true
+    talk: true
+loss: &id001
+  alpha_action: 0.45
+  alpha_gaze: 0.45
+  alpha_hands: 0.05
+  alpha_talk: 0.05
+  gaze_weak_weight: 0.0
+best_score_weights: &id002
+  action: 0.45
+  gaze: 0.45
+  hands: 0.05
+  talk: 0.05
+eval:
+  clip_agg_mode: topk_mean
+  clip_topk: 3
+notify:
+  enabled: false
+  script: /home/yg/code/claude/telegram-bot/train_notify.sh
+  tag: model4_occgateRAW_explicitRegionScalarMaskGate_seed42_loss045
+  every_epoch: false
+task_region_scalar_loss045_experiment:
+  source_config: model4_occgateRAW_taskGated_occCNN_seed42.yaml
+  experiment_name: model4_occgateRAW_taskRegionScalarGatedLate_seed42_loss045
+  purpose: model4_dms converted to task_region_scalar_gated_late with action/gaze-balanced
+    loss
+  fusion_kind: task_region_scalar_gated_late
+  loss_weights:
+    alpha_action: 0.45
+    alpha_gaze: 0.45
+    alpha_hands: 0.05
+    alpha_talk: 0.05
+    gaze_weak_weight: 0.0
+  best_score_weights:
+    action: 0.45
+    gaze: 0.45
+    hands: 0.05
+    talk: 0.05
+  patience: 4
+hgnet_4545_experiment:
+  experiment_name: model4_occgateRAW_explicitRegionScalarMaskGate_seed42_loss045
+  fusion_kind: explicit_region_scalar_mask_gate
+  run_root: /data/shared/scuppy/hyi/Ablation/HGNET_Classification
+  loss_weights: *id001
+  best_score_weights: *id002
+  patience: 4
+  seed: 42
+  enabled_experiments:
+  - task_gated_late
+  - task_region_scalar_gated_late
+  - explicit_region_scalar_mask_gate
