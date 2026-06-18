@@ -1,0 +1,53 @@
+# Full integrated DMS runtime config template.
+# Fill in every REQUIRED path before running scripts/run_video_pair.py.
+
+# All relative paths resolve against this file's parent's parent, i.e. the `full_system/` dir.
+# Checkpoints are NOT tracked in git (see ../models/MODELS.md). Place the .pt files under
+# full_system/Model/ (paths below) or point to wherever you downloaded them.
+
+models:
+  # REQUIRED: body skeleton extractor YOLO-Pose weight
+  yolo_pose_path: Model/yolo_pose.pt
+
+  # REQUIRED: YOLO-face detector weight, e.g. yolov8n-face.pt or your trained face detector
+  yolo_face_path: Model/yolo_face.pt
+
+  # OPTIONAL but recommended: region visibility OCC CNN checkpoint
+  occ_cnn_path: Model/occ_cnn.pt
+
+  # OPTIONAL: if missing, the system skips ORFormer+HGNet and keeps MediaPipe landmarks under occlusion
+  orformer_ckpt: Model/orformer.pt
+  hgnet_ckpt: Model/hgnet.pt
+
+  # REQUIRED: trained DMS classifier config/checkpoint
+  # The classifier config is bundled with this runtime (it matches dms_checkpoint.pt).
+  dms_config_path: configs/model4_occgateRAW_explicitRegionScalarMaskGate_seed42_loss045.yaml
+  dms_checkpoint_path: Model/dms_checkpoint.pt
+
+runtime:
+  device: cuda        # cuda, cpu, or 0
+  window_size: 48
+  predict_stride: 1  # 1 = output after every frame once buffer is ready; 24 approximates training stride
+
+paths:
+  # This runtime reuses the repo's top-level classifier/ and landmark/ packages
+  # (byte-identical to the original vendored copies). Defaults already resolve to
+  # ../classifier and ../landmark; override only if you relocate them.
+  classifier_root: ../classifier
+  vendor_landmark_root: ../landmark
+  # ORFormer's only external dep (einops) is pip-installable, so no vendored path is needed.
+  vendor_orformer_path: null
+
+thresholds:
+  yolo_img_size: 640
+  yolo_pose_conf: 0.25
+  yolo_face_conf: 0.25
+  yolo_iou: 0.6
+  occ_visible_threshold: 0.5
+
+face:
+  facemesh_pad_ratio: 0.2
+  hgnet_enabled: true
+  hgnet_crop_pad_ratio: 0.10
+  default_visible_prob: 0.5
+  default_crop_valid: 0.0
