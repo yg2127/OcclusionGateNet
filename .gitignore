@@ -11,6 +11,15 @@ __pycache__/
 *.npy
 *.mp4
 *.avi
+*.wav
+*.mp3
+
+# full_system 런타임 산출물: 대용량만 차단(작은 jsonl/csv/png 샘플은 추적)
+full_system/Model/
+full_system/outputs/**/warning_predictions.jsonl
+full_system/outputs/**/*.mp4
+full_system/experiments/**/runs/
+full_system/experiments/**/run_all.log
 
 # 결과/캐시 디렉토리
 # results: 대용량만 차단(핵심 결과 CSV/json 은 추적)

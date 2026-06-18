@@ -43,16 +43,29 @@ model4_dms/
 │   ├── scripts/         # train_phase{1,2,3}_*.py (codebook→ORFormer→HGNet 학습)
 │   └── docs/            # METHOD_DIFF, TRAINING_LOG
 │
-└── pipeline/           # occlusion gating 파이프라인 + 실험 스크립트 (occ_cnn_v1)
-    ├── build_occgate_RAW_cache.py        # occgateRAW 좌표 캐시 (정상=facemesh / 가림=hgnet→facemesh)
-    ├── build_occgate_RAW_ft_cache.py     #   finetuned HGNet 버전 (model5)
-    ├── build_occgate_GT_cache.py         #   occgateGT (hgnet 좌표계 버전, 비교용)
-    ├── regen_hgnet478_ft_masked.py       # finetuned HGNet 으로 masked 좌표 재생성
-    ├── finetune_hgnet_fixedmask.py       # HGNet 을 8 appearance 가림으로 finetune
-    ├── train_occ_cnn.py                  # region occlusion CNN 학습 (TinyRegionCNN)
-    ├── verify_ft_nme.py / compare_orformer_vs_hgnet.py   # 랜드마크 NME 검증
-    ├── make_*_notebook.py                # 시각화 노트북 생성기
-    └── notebooks/                        # 결과 시각화 (gaze 사례, occlusion NME 진단)
+├── pipeline/           # occlusion gating 파이프라인 + 실험 스크립트 (occ_cnn_v1)
+│   ├── build_occgate_RAW_cache.py        # occgateRAW 좌표 캐시 (정상=facemesh / 가림=hgnet→facemesh)
+│   ├── build_occgate_RAW_ft_cache.py     #   finetuned HGNet 버전 (model5)
+│   ├── build_occgate_GT_cache.py         #   occgateGT (hgnet 좌표계 버전, 비교용)
+│   ├── regen_hgnet478_ft_masked.py       # finetuned HGNet 으로 masked 좌표 재생성
+│   ├── finetune_hgnet_fixedmask.py       # HGNet 을 8 appearance 가림으로 finetune
+│   ├── train_occ_cnn.py                  # region occlusion CNN 학습 (TinyRegionCNN)
+│   ├── verify_ft_nme.py / compare_orformer_vs_hgnet.py   # 랜드마크 NME 검증
+│   ├── make_*_notebook.py                # 시각화 노트북 생성기
+│   └── notebooks/                        # 결과 시각화 (gaze 사례, occlusion NME 진단)
+│
+└── full_system/        # ★ 실시간 통합(런타임) 시스템 — 영상 입력 → end-to-end DMS
+    ├── full_dms_system/                  # 8 stage wrapper + FullDMSSystem orchestrator
+    │   ├── yolo_pose_skeleton_extractor / yolo_face_bbox_extractor / mediapipe_facemesh_yolo
+    │   ├── occ_cnn_realtime              # occ CNN 온라인 추론 → x_occ
+    │   ├── hgnet_restorer                # ORFormer + HGNet 온라인 복원
+    │   ├── occ_gate_merger / temporal_buffer(48f) / dms_classifier_wrapper
+    │   └── full_system.py                # 전체 파이프라인 결합
+    ├── configs/        # 런타임 템플릿 + DMS 분류기 config(체크포인트와 매칭)
+    ├── scripts/        # run_video_pair / overlay / edge-TTS 경고음 / smoke test
+    ├── experiments/retrain_ablation/     # leave-one-module-out 재학습 ablation
+    └── notebooks/, outputs/(샘플)
+    # classifier/ · landmark/ 코드를 그대로 재사용(중복 없음). 체크포인트는 models/MODELS.md
 ```
 
 ## 파이프라인 (end-to-end)
@@ -109,6 +122,25 @@ cd classifier
 PYTHONPATH=$(pwd):$(pwd)/configs python src/training/train.py \
   --config configs/generated/model4_occgateRAW_taskGated_occCNN_seed42.yaml
 ```
+
+### 실시간 통합 시스템 (`full_system/`)
+
+위 추론 파이프라인은 학습 시 **오프라인 캐시(npz)** 기반이다. `full_system/` 은 같은 구성요소를
+**영상 한 쌍(face/body)에 대해 매 프레임 온라인으로** 돌리는 런타임이다 — ORFormer·HGNet·occ CNN 을
+캐시가 아니라 직접 추론한다.
+
+```
+face_frame + body_frame
+ ├─ body: YOLO-Pose → skeleton(17,2)
+ └─ face: YOLO-face bbox → [ occ CNN(가시성) , MediaPipe FaceMesh(478) ]
+          └─ 가림 region 있으면 → ORFormer→reference heatmap→HGNet 복원 → 가린 부위만 치환
+ → 최근 48프레임 → Model4 분류기 → action / gaze / hands / talk
+```
+
+- 얼굴 분기가 실패해도(검출 실패 등) zero landmark + 중립 occ 로 **추론을 멈추지 않고** body 분기로 계속 진행.
+- `classifier/` · `landmark/` 코드를 그대로 재사용하고, 체크포인트는 `models/MODELS.md` 참조.
+- 실행: `python full_system/scripts/run_video_pair.py --config full_system/configs/full_dms_config_template.yaml --face-video ... --body-video ...`
+- 상세는 [`full_system/README.md`](full_system/README.md).
 
 ## 주요 결과 (gaze head, clip-level macro-F1)
 
