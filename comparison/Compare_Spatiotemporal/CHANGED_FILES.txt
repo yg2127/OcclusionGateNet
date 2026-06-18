@@ -1,0 +1,12 @@
+Created SDA-TR-inspired spatiotemporal comparator.
+
+Key files:
+- configs/spatiotemporal_dms_base.yaml
+- src/models/fusion/spatiotemporal_decoupling_face.py
+- src/models/fusion/factory.py
+- src/models/multitask_classifier.py
+- tools/run_spatiotemporal_dms_seed_sweep.py
+- tools/summarize_spatiotemporal_dms_results.py
+- train/run_spatiotemporal_dms_seed_sweep.sh
+
+Removed previous PO-GUISE-specific config/script/module names.

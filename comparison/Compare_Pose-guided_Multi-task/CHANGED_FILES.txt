@@ -1,0 +1,15 @@
+Minimal PO-GUISE-inspired comparator package.
+
+Kept only files needed to train/evaluate the new comparator:
+- configs/poguise_dms_base.yaml
+- src/data, src/training, src/evaluation, src/utils, src/experiment
+- src/models/backbones, src/models/temporal
+- src/models/fusion/pose_guided_token_selection.py
+- src/models/fusion/factory.py
+- src/models/fusion/task_feature_fusion.py
+- src/models/fusion/concat_joint.py
+- tools/run_poguise_dms_seed_sweep.py
+- tools/summarize_poguise_dms_results.py
+- train/run_poguise_dms_seed_sweep.sh
+
+Removed old ablation yaml/scripts/fusion comparators/docs/pycache.
