@@ -4,13 +4,20 @@ OcclusionGateNet의 **차폐 강건성**을 위해 DMD 얼굴 영상에 **부위
 데이터·코드 툴체인. 원본 DMD만으로는 부위별 차폐를 통제해 학습·평가하기 어렵기 때문에, 눈·입 등 주요
 얼굴 영역을 다양한 appearance로 인위 차폐한 서브셋을 자체 구축했다.
 
-이 마스킹은 **ORFormer+HGNet 랜드마크 복원 모델의 fixedmask fine-tuning**에 사용된다.
-기존 HGNet(phase3a)은 zero-paint(검정) 6종만 학습해 checker/stripe/noise 등 다양한 appearance에서
-가린 부위의 복원 오차(NME)가 커졌는데, 여기서 만든 **8종 appearance 합성 차폐**로 추가 학습해
-clean 대비 NME ≤ 5%로 복원하도록 강건화했다. (이 강건화된 HGNet을 `full_system`의 `HGNetRestorer`가 사용.)
+이 서브셋은 **두 곳에 쓰인다.**
 
-> ⚠️ 부위별 **가시성 판단 CNN(Occlusion CNN)** 은 이 데이터가 아니라 **별도의 hand-labeled 데이터**로
-> 학습된 모델(hyi Step9)이다. 본 폴더는 **랜드마크 복원(HGNet) 파인튜닝**용 합성 차폐 툴체인이다.
+1. **부위별 가시성 CNN(occ CNN) 학습용 데이터셋** — `make_region_occlusion_dataset.py`가
+   `region_occlusion_cnn_dataset_v2`(facecrop 256, `labels.jsonl`의 3-label 가시성)를 생성하며,
+   이를 읽어 `TinyRegionCNN`으로 부위별 occluded/visible을 학습한다
+   (`train_CNN.py`, 원본은 hyi `external_scripts/hyi_masking/Step3_full_dir/`).
+2. **HGNet 랜드마크 복원의 fixedmask fine-tuning** — 저장된 데이터셋을 읽는 대신 생성기의
+   `make_pattern`을 **on-the-fly로 재사용**해, ORFormer(frozen)+HGNet 파이프라인의 HGNet을 8종
+   appearance에 강건화한다(`pipeline/finetune_hgnet_fixedmask.py`). 기존 HGNet(phase3a)은
+   zero-paint 6종만 학습해 checker/stripe/noise 등에서 가린 부위 NME가 커졌는데, 여기서 clean 대비
+   NME ≤ 5%로 복원하도록 강건화했다. (이 HGNet을 `full_system`의 `HGNetRestorer`가 사용.)
+
+> ℹ️ 런타임에 배포되는 occ CNN은 `full_system`의 **VisibilityResNet18(4-label, hyi Step9)** 로,
+> 위 `TinyRegionCNN`(3-label)과는 다른 모델이다. 배포 모델의 정확한 학습 데이터는 본 폴더 범위 밖이다.
 
 ![region × appearance grid](samples/occlusion_region_appearance_grid.png)
 
