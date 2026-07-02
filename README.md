@@ -19,7 +19,7 @@
 
 ## 핵심 결과
 
-- **차폐 상황에서도 강건**: clean→masked clip-level Macro-F1 하락폭이 action **0.8%p** / gaze **8.3%p** / hands **0.8%p** / talk **0.5%p** 로 작음.
+- **차폐 상황에서도 강건**: clean→masked clip-level Macro-F1 절대 하락폭이 action **0.7%p** / gaze **5.3%p** / hands **0.5%p** / talk **0.4%p** 로 작음(가장 민감한 gaze도 5.3%p).
 - **외부 SOTA 비교군 대비 masked gaze F1 최고**: DriveAct 대비 **+10.83%**, 최저 비교군 대비 **+46.32%** (Ours 0.5831).
 - **종합 강건성**: 비교군 평균 대비 종합 F1 **+11.4%**, 성능 저하 지수 **PDI 6.93% → 3.67% (≈47% 감소)**.
 - **모듈 검증**: 차폐 판단 CNN Macro-F1 **0.9714**, 차폐 좌표 복원 NME **≤ 5%**(clean 대비), IR pose mAP50-95 **0.788**.
@@ -43,10 +43,15 @@
 | **동적 융합·분류** | `DMSClassifierWrapper` (+ `MultitaskClassifier`) | Occlusion-aware Dynamic Fusion(Mask Gate) → action/gaze/hands/talk |
 | 경고 (데모) | `WarningStateMachine` (`scripts/`) | 위험 판단 → 시각+음성(TTS) 경고 |
 
-## 핵심 기여 (3 pillars)
+## 접근법 (3 pillars)
 
 1. **NIR 도메인 적응** — 공개 데이터의 RGB 모델은 IR 차량 실내에서 불안정(RGB gaze 86.3% vs IR 76.8%). DMD NIR 1,000프레임을 직접 annotation 해 YOLO-Pose를 fine-tuning(mAP50-95 0.788).
-2. **차폐 랜드마크 복원** — 가림으로 무너지는 FaceMesh를 **ORFormer + VQ-VAE + HGNet**으로 복원, clean 대비 NME 5% 이내 유지.
+2. **차폐 랜드마크 복원** — 가림으로 무너지는 FaceMesh를 **ORFormer + VQ-VAE + HGNet**으로 복원. 8종 합성 차폐로 **ORFormer & HGNet을 fixedmask 파인튜닝** 해 checker/stripe/noise 등에서도 clean 대비 NME 5% 이내 유지.
+
+   <img src="docs/assets/hgnet_reconstruction_grid.png" alt="ORFormer+HGNet 랜드마크 복원 — 7종 fixedmask 변형별 GT vs 복원" width="640">
+
+   *7종 fixedmask 변형(정상·선글라스 3종·하관·좌/우 반면)에서 ORFormer+HGNet 복원 결과. 🔵 GT · 🟠 복원(pred) · 🔴 가린 영역(masked) — 가린 부위까지 복원 좌표가 GT에 근접(변형별 NME 1.2~3.6%).*
+
 3. **Occlusion-aware Dynamic Fusion** — 부위별 가시성(occ CNN)을 task·region 단위 **Mask Gate**로 활용해 얼굴·자세 단서 비중을 동적 조정. No-Occ baseline 대비 masked gaze F1 **+9.63%p**.
 
 ## 결과 및 분석
@@ -55,12 +60,12 @@
 
 ![Main Result: clean vs masked F1](docs/assets/result_main_f1.png)
 
-| Task | clean | masked (occluded) | 하락폭 |
+| Task | clean | masked (occluded) | 절대 하락폭(%p) |
 |---|---|---|---|
-| action | 0.853 | 0.846 | 0.8%p |
-| **gaze** | 0.636 | 0.583 | **8.3%p** |
-| hands | 0.704 | 0.699 | 0.8%p |
-| talk | 0.752 | 0.748 | 0.5%p |
+| action | 0.853 | 0.846 | 0.7%p |
+| **gaze** | 0.636 | 0.583 | **5.3%p** |
+| hands | 0.704 | 0.699 | 0.5%p |
+| talk | 0.752 | 0.748 | 0.4%p |
 
 가장 차폐에 민감한 gaze조차 큰 하락 없이 유지된다.
 
@@ -99,7 +104,6 @@ action/gaze/hands/talk 분류 + 부위별 차폐도를 오버레이하고 위험
 ## 데이터셋
 
 - **DMD (Driver Monitoring Dataset)** — 41h, 37 drivers, Face/Body/Hands × RGB/IR/Depth, 4-task(OpenLABEL annotation).
-- **Masking 서브셋(자체 구축)** — 눈·입 등 주요 부위를 8종 appearance(blur/checker/noise/solid/stripe 등)로 인위 차폐해 차폐 학습·평가에 사용. 생성 코드·예시: [`data/occlusion_subset/`](data/occlusion_subset/).
 
 | Task | 입력 | 라벨 |
 |---|---|---|
@@ -108,6 +112,13 @@ action/gaze/hands/talk 분류 + 부위별 차폐도를 오버레이하고 위험
 | Hands | Body/Hands | both / right / left / none |
 | Talk | Face 중심 | talking / not_talking |
 | Occlusion | Face/Body/Hands | region별 visible / occluded |
+
+- **Region-Occlusion 서브셋(자체 구축)** — 얼굴 4개 부위(**좌눈·우눈·양눈·입**)를 8종 appearance(solid·soft_solid·blur_patch·smooth_noise·soft_noise·noise·checker·stripe)로 합성 차폐. 부위별 가시성 CNN(occ CNN) 학습 및 HGNet fixedmask 파인튜닝에 사용.
+
+![Region-Occlusion 서브셋: region × appearance 합성 차폐 예시](data/occlusion_subset/samples/occlusion_region_appearance_grid.png)
+
+*행 = 차폐 region(clean / both_eyes / left_eye / right_eye / mouth / full_occlusion), 열 = appearance(solid · soft_solid · blur_patch · smooth_noise · soft_noise · noise · checker · stripe).*
+
 
 ## 저장소 구조
 
