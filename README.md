@@ -99,7 +99,7 @@ action/gaze/hands/talk 분류 + 부위별 차폐도를 오버레이하고 위험
 ## 데이터셋
 
 - **DMD (Driver Monitoring Dataset)** — 41h, 37 drivers, Face/Body/Hands × RGB/IR/Depth, 4-task(OpenLABEL annotation).
-- **Masking 서브셋(자체 구축)** — 눈·입 등 주요 부위를 8종 appearance(blur/checker/noise/solid/stripe 등)로 인위 차폐해 차폐 학습·평가에 사용.
+- **Masking 서브셋(자체 구축)** — 눈·입 등 주요 부위를 8종 appearance(blur/checker/noise/solid/stripe 등)로 인위 차폐해 차폐 학습·평가에 사용. 생성 코드·예시: [`data/occlusion_subset/`](data/occlusion_subset/).
 
 | Task | 입력 | 라벨 |
 |---|---|---|
@@ -112,12 +112,13 @@ action/gaze/hands/talk 분류 + 부위별 차폐도를 오버레이하고 위험
 ## 저장소 구조
 
 ```
-full_model/
+OcclusionGateNet/
 ├── landmark/            # ① ORFormer + HGNet 랜드마크 복원 (학습 코드)
 ├── classifier/          # ② 멀티태스크 분류기 코어 (OcclusionGateNet fusion 포함)
 ├── full_system/         # ★ 최종 통합 실시간 시스템 (영상 → end-to-end DMS)
 │   ├── full_dms_system/ #   8 stage 런타임 모듈 + FullDMSSystem orchestrator
 │   ├── configs/ scripts/ experiments/ notebooks/
+├── data/occlusion_subset/  # 차폐 마스킹 서브셋 생성 코드 + 예시(occ CNN 학습 데이터)
 ├── pipeline/            # occgate 캐시 생성 · occ CNN 학습 등 재현 스크립트
 ├── models/              # 체크포인트 provenance (MODELS.md / PROVENANCE.md)
 ├── experiments/         # 연구 검증
