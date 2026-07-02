@@ -118,7 +118,7 @@ OcclusionGateNet/
 ├── full_system/         # ★ 최종 통합 실시간 시스템 (영상 → end-to-end DMS)
 │   ├── full_dms_system/ #   8 stage 런타임 모듈 + FullDMSSystem orchestrator
 │   ├── configs/ scripts/ experiments/ notebooks/
-├── data/occlusion_subset/  # 차폐 마스킹 서브셋 생성 코드 + 예시(occ CNN 학습 데이터)
+├── data/occlusion_subset/  # 차폐 합성 마스킹 툴체인 (HGNet 복원 fixedmask 파인튜닝용)
 ├── pipeline/            # occgate 캐시 생성 · occ CNN 학습 등 재현 스크립트
 ├── models/              # 체크포인트 provenance (MODELS.md / PROVENANCE.md)
 ├── experiments/         # 연구 검증
